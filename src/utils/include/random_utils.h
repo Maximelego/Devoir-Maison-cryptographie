@@ -5,7 +5,7 @@
 #ifndef PROJET_RANDOM_UTILS_H
 #define PROJET_RANDOM_UTILS_H
 
-#include "../../constants.h"
+#include "../../include/constants.h"
 #include <stdio.h>
 #include <stdlib.h>
 

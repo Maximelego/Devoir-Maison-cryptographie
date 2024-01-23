@@ -8,5 +8,4 @@
 
 void generateBigRandomNumber() {
     if (DEBUG_MODE) { printf("[INFO] - Starting the generation of a random number ...\n"); }
-
 }

@@ -1,2 +1,12 @@
+# Compilation files
 cmake-build-debug
+main
+Makefile
+CMakeFiles
+CMakeLists.txt
+CMakeCache.txt
+cmake_install.cmake
+
+# IDE configs
 .idea
+.vscode
