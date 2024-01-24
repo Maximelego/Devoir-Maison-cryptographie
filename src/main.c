@@ -9,8 +9,8 @@ int main() {
 
     printf("# ---- Welcome ! ---- #\n\n");
 
-    generateBigRandomNumber();
+    generate_big_randomNumber(150);
 
-    printf("# ---- Goodbye ! ---- #\n\n");
+    printf("\n# ---- Goodbye ! ---- #\n\n");
     return 0;
 }

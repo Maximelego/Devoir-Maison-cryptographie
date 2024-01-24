@@ -5,10 +5,10 @@
 #ifndef PROJET_RANDOM_UTILS_H
 #define PROJET_RANDOM_UTILS_H
 
-#include "../../include/constants.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include "../../include/constants.h"
 
-void generateBigRandomNumber();
+void generate_big_randomNumber(int size);
 
 #endif //PROJET_RANDOM_UTILS_H
