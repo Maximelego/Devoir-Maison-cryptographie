@@ -9,7 +9,7 @@ int main() {
 
     printf("# ---- Welcome ! ---- #\n\n");
 
-    generate_big_randomNumber(150);
+    mpz_t* random_number = generate_big_randomNumber(150);
 
     printf("\n# ---- Goodbye ! ---- #\n\n");
     return 0;

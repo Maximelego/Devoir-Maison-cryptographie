@@ -42,5 +42,3 @@ target_include_directories(main PRIVATE ${SOURCE_DIR})
 
 # Liez l'exécutable à la bibliothèque GMP
 target_link_libraries(main gmp)
-
-message("[INFO] - Done !")

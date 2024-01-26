@@ -1,6 +1,44 @@
 # Devoir Maison cryptographie
+
+## Guide d'installation du programme.
+
+### Pré-requis : 
+Ce programme C nécessite les outils suivants : 
+- CMake (VERSION 3.10)
+- Makefile
+- gcc
+- libgmp-dev (peut être installé avec l'exécution du CMakeLists.txt s'il n'est pas détecté)
+
+### Installation et exécution : 
+
+Placez vous dans le dossier du programme avec votre terminal de commandes.
+
+Création du makefile : 
+```bash
+mkdir build
+cd build
+cmake ..
+```
+Si libgmp-dev n'est pas disponible sur votre environnement, le programme cmake tentera de l'installer avec apt. Ceci est une action nécessitant un compte utilisateur *sudo*.
  
-## Documentation des fonctions de base GMP proposée par ChatGPT : 
+Build du projet :
+```bash
+make
+```
+
+Exécution du projet :
+```bash
+./main
+```
+
+Autres commandes : 
+```bash
+make clean  # Permet de nettoyer les fichiers compilés du projet.
+make help   # Affiche une liste des commandes proposées par le makefile.
+rm -r build # Permet de nettoyer le dossier build contenant les fichiers compilés par le makefile ainsi que ceux du cmake.
+```
+
+## Documentation des fonctions de base GMP proposée par ChatGPT.
 
 Voici une brève présentation détaillée des principales fonctions de la bibliothèque GMP pour les entiers (mpz_t) :
 

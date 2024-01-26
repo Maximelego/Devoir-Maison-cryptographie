@@ -6,6 +6,7 @@ CMakeFiles
 CMakeLists.txt
 CMakeCache.txt
 cmake_install.cmake
+build
 
 # IDE configs
 .idea
