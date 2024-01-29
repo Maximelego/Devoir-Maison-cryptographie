@@ -1,5 +1,4 @@
 #!/bin/sh
-
 # Checking if the build directory must be re-created.
 if test -d ./build
 then 
