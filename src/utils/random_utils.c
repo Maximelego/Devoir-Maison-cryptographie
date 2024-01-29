@@ -6,7 +6,7 @@
 #include "include/big_numbers_utils.h"
 
 
-mpz_t* generate_big_randomNumber(int size) {
+void generate_big_randomNumber(int size, mpz_t number) {
 
     if (DEBUG_MODE) { 
         printf("[INFO] - (generate_big_randomNumber) Starting the generation of a random number ...\n");
@@ -21,7 +21,5 @@ mpz_t* generate_big_randomNumber(int size) {
         printf("[INFO] - (generate_big_randomNumber) Generating random number...\n");
     }
 
-    mpz_t* number = init_variable_for_big_numbers();
-        
-    return number;
+    init_variable_for_big_numbers(number);
 }

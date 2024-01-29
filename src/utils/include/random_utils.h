@@ -11,6 +11,6 @@
 #include "gmp.h"
 #include "../../include/constants.h"
 
-mpz_t* generate_big_randomNumber(int size);
+void generate_big_randomNumber(int size, mpz_t number);
 
 #endif //PROJET_RANDOM_UTILS_H
