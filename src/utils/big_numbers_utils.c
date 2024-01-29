@@ -33,6 +33,8 @@ void add_big_numbers(mpz_t result, mpz_t op1, mpz_t op2) {
         printf("[INFO] - (add_big_numbers) Starting operation ...\n");
     }
 
+    init_variable_for_big_numbers(result);
+    mpz_add(result, op1, op2);
 
     if (DEBUG_MODE) { 
         printf("[INFO] - (free_variable_for_big_numbers) ");

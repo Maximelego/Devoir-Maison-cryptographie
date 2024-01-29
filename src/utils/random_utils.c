@@ -16,10 +16,12 @@ void generate_big_randomNumber(int size, mpz_t number) {
 
     gmp_randstate_t randstate;
     gmp_randinit_default(randstate);
+    gmp_randseed_ui(randstate, RANDOM_SEED);
 
     if (DEBUG_MODE) { 
         printf("[INFO] - (generate_big_randomNumber) Generating random number...\n");
     }
 
     init_variable_for_big_numbers(number);
+    mpz_urandomb(number, randstate, size);
 }
