@@ -61,7 +61,7 @@ int main() {
     gmp_randstate_t randstate; 
     init_randstate(randstate);
 
-    try_n_decomp(100000, randstate);    
+    try_n_decomp(10000, randstate);    
 
     printf("\n# ---- Goodbye ! ---- #\n\n");
     return 0;
