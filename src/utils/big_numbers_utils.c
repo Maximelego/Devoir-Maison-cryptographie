@@ -1,7 +1,7 @@
 #include "include/big_numbers_utils.h"
 
 
-void init_variable_for_big_numbers(mpz_t var) {
+void bn_init_var(mpz_t var) {
 
     if (DEBUG_MODE) { 
         printf("[INFO] - (init_variable_for_big_numbers) Preparing var ...\n");
@@ -15,7 +15,7 @@ void init_variable_for_big_numbers(mpz_t var) {
 }
 
 
-void free_variable_for_big_numbers(mpz_t var) {
+void bn_free_var(mpz_t var) {
     if (DEBUG_MODE) { 
         printf("[INFO] - (free_variable_for_big_numbers) Freeing var ...\n");
     }
@@ -28,12 +28,12 @@ void free_variable_for_big_numbers(mpz_t var) {
 }
 
 
-void add_big_numbers(mpz_t result, mpz_t op1, mpz_t op2) {
+void bn_add(const mpz_t op1, const mpz_t op2, mpz_t result) {
     if (DEBUG_MODE) { 
         printf("[INFO] - (add_big_numbers) Starting operation ...\n");
     }
 
-    init_variable_for_big_numbers(result);
+    bn_init_var(result);
     mpz_add(result, op1, op2);
 
     if (DEBUG_MODE) { 

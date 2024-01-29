@@ -8,6 +8,9 @@ CMakeCache.txt
 cmake_install.cmake
 build
 
+# Output files
+output.txt
+
 # IDE configs
 .idea
 .vscode
