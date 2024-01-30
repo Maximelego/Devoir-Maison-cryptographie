@@ -9,14 +9,13 @@
 #include "utils/include/big_numbers_utils.h"
 #include "utils/include/decomposition.h"
 
-int end_flag = 0;
+int end_flag = 0;       // Flag for ending the loading animation.
 
 void sigusr1_handler(int signo) {
     if (signo == SIGUSR1) {
         end_flag = 1;
     }
 }
-
 
 
 void init_randstate(gmp_randstate_t randstate) {
@@ -34,7 +33,7 @@ void try_n_decomp(const unsigned long n, gmp_randstate_t randstate) {
     mpz_t d;             bn_init_var(d);
 
     if (LOG_TO_FILE) {
-        file = fopen("output.txt", "w");
+        file = fopen("output_decomp.txt", "w");
     }
 
     // Doing the N loop.
@@ -60,11 +59,47 @@ void try_n_decomp(const unsigned long n, gmp_randstate_t randstate) {
     }
 }
 
-void try_n_exp_mod(const unsigned long n, gmp_randstate_t randstate) {
-    
+
+void try_n_exp_mod(const unsigned long iterations, gmp_randstate_t randstate) {
+
+    // Variables initialization.
+    unsigned long i = 0;
+    FILE* file;
+    mpz_t a;        bn_init_var(a);
+    mpz_t n;        bn_init_var(n);
+    mpz_t t;        bn_init_var(t);
+    mpz_t result;   bn_init_var(result);
+
+    if (LOG_TO_FILE) {
+        file = fopen("output_expmod.txt", "w");
+    }
+
+    // Doing the N loop.
+    while (i < iterations) {
+
+        generate_big_randomNumber(RANDOM_NUMBERS_SIZE, randstate, a);
+        generate_big_randomNumber(RANDOM_NUMBERS_SIZE, randstate, n);
+        generate_big_randomNumber(RANDOM_NUMBERS_SIZE, randstate, t);
+
+        ExpMod(n, a, t, result);
+
+        if (LOG_TO_FILE) { 
+            log_expmod_to_file(result, n, a, t, file); 
+        }
+
+        i ++;
+    }
+
+    // Freeing vars.
+    bn_free_var(result);
+    bn_free_var(a);
+    bn_free_var(n);
+    bn_free_var(t);
+
+    if (LOG_TO_FILE) {
+        fclose(file);
+    }
 }
-
-
 
 
 
@@ -91,6 +126,9 @@ int main() {
 
     printf("# ---- Welcome ! ---- #\n\n");
 
+    if (LOG_TO_FILE) { printf("[INFO] - LOG_TO_FILE is set to true. Results will be outputted into an output.txt file.\n"); }
+    if (DEBUG_MODE)  { printf("[INFO] - DEBUG_MODE is set to true. Results will be outputted in standart terminal.\n"); }
+
     gmp_randstate_t randstate; 
     init_randstate(randstate);
 
@@ -105,8 +143,9 @@ int main() {
     switch(child_pid = fork()) {
         case 0 :
             // Child process.
-            // -> Long operation
-            try_n_decomp(1000000, randstate);    
+            // -> Long operation(s)
+            try_n_decomp(ITERATION_NUMBER, randstate);
+            try_n_exp_mod(ITERATION_NUMBER, randstate);
 
             // -> When done, we signal it to the parent process.
             kill(getppid(), SIGUSR1);
@@ -116,6 +155,7 @@ int main() {
             return EXIT_FAILURE;
 
         default:
+
             // Code du processus père (animation)
             loadingAnimation();
 

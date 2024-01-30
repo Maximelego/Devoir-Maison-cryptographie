@@ -20,14 +20,30 @@ void Decomp(const mpz_t n, mpz_t s, mpz_t d) {
 }
 
 
-void ExpMod(const mpz_t n, const mpz_t a, const mpz_t t, mpz_t result) {
+void exponential(mpz_t a, mpz_t t, mpz_t result) {
+    if (mpz_cmp_ui(t, 1)) {         // If t is 1.
+        mpz_set(result, a);             // result = a
+    } else if(mpz_even_p(t)) {      // If t is pair.
+        mpz_pow_ui(a, a, 2);            // a = a²
+        mpz_divexact_ui(t, t, 2);       // t = t/2
+        exponential(a, t, result);      // exponential(a², t/2, result)
+    } else {                        // If t > 2 and odd
+        mpz_pow_ui(a, a, 2);            // a = a²
+        mpz_sub_ui(t, t, 1);            // t = t - 1
+        mpz_divexact_ui(t, t, 2);       // t = t/2
+        exponential(a, t, result);      // exponential(a², (t-1)/2, result)
+        mpz_mul(result, result, a);     // result = a * result
+    }
+}
 
-    
 
+void ExpMod(const mpz_t n, mpz_t a, mpz_t t, mpz_t result) {
+    mpz_t temp; bn_init_var(temp);
 
+    exponential(a, t, temp);        // temp = a^t
+    mpz_mod(result, temp, n);       // result = temp mod(n)
 
-
-
+    bn_free_var(temp);
 }
 
 
@@ -46,6 +62,19 @@ void log_decomp_to_file(const mpz_t n, const mpz_t s, const mpz_t d, FILE* file)
         gmp_fprintf(file, " -> d = %Zd\n\n", d);
         fflush(file);
     } else {
-        printf("[ERROR] - Unable to open output file !\n");
+        printf("[ERROR] - Unable to open output decomp file !\n");
+    }
+}
+
+void log_expmod_to_file(const mpz_t result, const mpz_t n, const mpz_t a, const mpz_t t, FILE* file) {
+    if (file != NULL) {
+        gmp_fprintf(file, "- ExpMod of : \n");
+        gmp_fprintf(file, " -> a      = %Zd\n", a);
+        gmp_fprintf(file, " -> t      = %Zd\n", t);
+        gmp_fprintf(file, " -> n      = %Zd\n", n);
+        gmp_fprintf(file, " -> result = %Zd\n\n", result);
+        fflush(file);
+    } else {
+        printf("[ERROR] - Unable to open output expmod file !\n");
     }
 }
