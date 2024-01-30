@@ -13,29 +13,24 @@ Ce programme C nécessite les outils suivants :
 
 Placez vous dans le dossier du programme avec votre terminal de commandes.
 
-Création du makefile : 
+Création du repertoire build: 
 ```bash
-mkdir build
-cd build
-cmake ..
+chmod +x ./build.sh
+./build.sh
 ```
 
 Si libgmp-dev n'est pas disponible sur votre environnement, le programme cmake tentera de l'installer avec apt. Ceci est une action nécessitant un compte utilisateur *sudo*.
- 
-Build du projet :
-```bash
-make
-```
 
 Exécution du projet :
 ```bash
-./main
+./build/main
 ```
 
-Autres commandes : 
+Autres commandes (il faudra se placer dans le répertoire build pour pouvoir exécuter les commandes make) : 
 ```bash
 make clean  # Permet de nettoyer les fichiers compilés du projet.
 make help   # Affiche une liste des commandes proposées par le makefile.
+
 rm -r build # Permet de nettoyer le dossier build contenant les fichiers compilés par le makefile ainsi que ceux du cmake.
 ```
 

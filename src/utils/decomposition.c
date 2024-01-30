@@ -54,6 +54,7 @@ void print_decomp(const mpz_t n, const mpz_t s, const mpz_t d) {
     gmp_printf("Such as n - 1 = 2^s * d and with d odd.\n\n");
 }
 
+
 void print_expmod(const mpz_t result, const mpz_t n, const mpz_t a, const mpz_t t) {
     gmp_printf("[RESULT] - ExpMod of : \n");
     gmp_printf(" -> a      = %Zd\n", a);
