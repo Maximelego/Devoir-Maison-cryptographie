@@ -2,8 +2,7 @@
 
 void Decomp(const mpz_t n, mpz_t s, mpz_t d) {
     // Initialisation des variables.
-    mpz_t temp;
-    bn_init_var(temp);
+    mpz_t temp;     bn_init_var(temp);
 
     mpz_set_ui(s, 0);           // s = 0
     mpz_set(temp, n);           // temp  = n
@@ -16,6 +15,7 @@ void Decomp(const mpz_t n, mpz_t s, mpz_t d) {
     }
 
     mpz_set(d, temp);           // d = temp
+
     bn_free_var(temp);
 }
 
@@ -54,12 +54,21 @@ void print_decomp(const mpz_t n, const mpz_t s, const mpz_t d) {
     gmp_printf("Such as n - 1 = 2^s * d and with d odd.\n\n");
 }
 
+void print_expmod(const mpz_t result, const mpz_t n, const mpz_t a, const mpz_t t) {
+    gmp_printf("[RESULT] - ExpMod of : \n");
+    gmp_printf(" -> a      = %Zd\n", a);
+    gmp_printf(" -> t      = %Zd\n", t);
+    gmp_printf(" -> n      = %Zd\n", n);
+    gmp_printf(" -> result = %Zd\n\n", result);
+}
+
 
 void log_decomp_to_file(const mpz_t n, const mpz_t s, const mpz_t d, FILE* file) {
     if (file != NULL) {
         gmp_fprintf(file, "- Decomposition of n = %Zd : \n", n);
         gmp_fprintf(file, " -> s = %Zd\n", s);
         gmp_fprintf(file, " -> d = %Zd\n\n", d);
+
         fflush(file);
     } else {
         printf("[ERROR] - Unable to open output decomp file !\n");
@@ -73,6 +82,7 @@ void log_expmod_to_file(const mpz_t result, const mpz_t n, const mpz_t a, const 
         gmp_fprintf(file, " -> t      = %Zd\n", t);
         gmp_fprintf(file, " -> n      = %Zd\n", n);
         gmp_fprintf(file, " -> result = %Zd\n\n", result);
+
         fflush(file);
     } else {
         printf("[ERROR] - Unable to open output expmod file !\n");
