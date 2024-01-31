@@ -12,5 +12,6 @@
 #include "../../include/constants.h"
 
 void generate_big_randomNumber(const unsigned long size, gmp_randstate_t randstate, mpz_t number);
+void generate_big_randomNumber_between_one_and_n_minus_one(mpz_t upper_bound, gmp_randstate_t randstate, mpz_t number);
 
 #endif //PROJET_RANDOM_UTILS_H

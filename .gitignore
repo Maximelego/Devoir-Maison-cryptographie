@@ -9,7 +9,8 @@ cmake_install.cmake
 build
 
 # Output files
-output.txt
+output_decomp.txt
+output_expmod.txt
 
 # IDE configs
 .idea
