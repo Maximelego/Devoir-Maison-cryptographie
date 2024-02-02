@@ -20,32 +20,33 @@ void Decomp(const mpz_t n, mpz_t s, mpz_t d) {
 }
 
 
-void exponential(mpz_t a, mpz_t t, mpz_t result) {
-    if (mpz_cmp_ui(t, 1)) {         // If t is 1.
-        mpz_set(result, a);             // result = a
-    } else if(mpz_even_p(t)) {      // If t is pair.
-        mpz_pow_ui(a, a, 2);            // a = a²
-        mpz_divexact_ui(t, t, 2);       // t = t/2
-        exponential(a, t, result);      // exponential(a², t/2, result)
-    } else {                        // If t > 2 and odd
-        mpz_pow_ui(a, a, 2);            // a = a²
-        mpz_sub_ui(t, t, 1);            // t = t - 1
-        mpz_divexact_ui(t, t, 2);       // t = t/2
-        exponential(a, t, result);      // exponential(a², (t-1)/2, result)
-        mpz_mul(result, result, a);     // result = a * result
+void ExpMod(const mpz_t mod, mpz_t base, mpz_t exponent,  mpz_t result) {
+    mpz_t tmp;
+    mpz_init(tmp);
+
+    // Initialisation du résultat à 1
+    mpz_set_ui(result, 1);
+
+    // Copie de l'exposant dans une variable temporaire
+    mpz_set(tmp, exponent);
+
+    while (mpz_cmp_ui(tmp, 0) > 0) {
+        // Si l'exposant est impair
+        if (mpz_odd_p(tmp)) {
+            mpz_mul(result, result, base);
+            mpz_mod(result, result, mod);
+        }
+
+        // Division de l'exposant par 2
+        mpz_div_ui(tmp, tmp, 2);
+
+        // Calcul du carré de la base modulo mod
+        mpz_mul(base, base, base);
+        mpz_mod(base, base, mod);
     }
+
+    mpz_clear(tmp);
 }
-
-
-void ExpMod(const mpz_t n, mpz_t a, mpz_t t, mpz_t result) {
-    mpz_t temp; bn_init_var(temp);
-
-    exponential(a, t, temp);        // temp = a^t
-    mpz_mod(result, temp, n);       // result = temp mod(n)
-
-    bn_free_var(temp);
-}
-
 
 void print_decomp(const mpz_t n, const mpz_t s, const mpz_t d) {
     gmp_printf("[RESULT] - Decomposition of n = %Zd : \n", n);

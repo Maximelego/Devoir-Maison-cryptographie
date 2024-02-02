@@ -25,6 +25,9 @@ void init_randstate(gmp_randstate_t randstate) {
 
 
 void try_n_decomp(const unsigned long n, gmp_randstate_t randstate) {
+
+    if (DEBUG_MODE){ printf("[INFO] - Starting DECOMP tests...\n"); }
+
     // Variables initialization.
     unsigned long i = 0;
     FILE* file;
@@ -57,10 +60,14 @@ void try_n_decomp(const unsigned long n, gmp_randstate_t randstate) {
     if (LOG_TO_FILE) {
         fclose(file);
     }
+
+    if (DEBUG_MODE){ printf("[INFO] - Done DECOMP tests.\n"); }  
 }
 
 
 void try_n_exp_mod(const unsigned long iterations, gmp_randstate_t randstate) {
+
+    if (DEBUG_MODE){ printf("[INFO] - Starting EXPMOD tests...\n"); }
 
     // Variables initialization.
     unsigned long i = 0;
@@ -81,7 +88,7 @@ void try_n_exp_mod(const unsigned long iterations, gmp_randstate_t randstate) {
         generate_big_randomNumber(RANDOM_NUMBERS_SIZE, randstate, n);
         generate_big_randomNumber(RANDOM_NUMBERS_SIZE, randstate, t);
 
-        ExpMod(n, a, t, result);
+        ExpMod(n, a, t, result);        // TODO : FIX THIS !!!! Too slow, waaaay too slooooow
 
         if (LOG_TO_FILE) { 
             log_expmod_to_file(result, n, a, t, file); 
@@ -99,6 +106,8 @@ void try_n_exp_mod(const unsigned long iterations, gmp_randstate_t randstate) {
     if (LOG_TO_FILE) {
         fclose(file);
     }
+
+    if (DEBUG_MODE){ printf("[INFO] - Done EXPMOD tests.\n"); }
 }
 
 
@@ -124,10 +133,10 @@ void loadingAnimation() {
 
 int main() {
 
-    printf("# ---- Welcome ! ---- #\n\n");
+    printf("\n\n# ---- Welcome ! ---- #\n\n\n");
 
     if (LOG_TO_FILE) { printf("[INFO] - LOG_TO_FILE is set to true. Results will be outputted into an output.txt file.\n"); }
-    if (DEBUG_MODE)  { printf("[INFO] - DEBUG_MODE is set to true. Results will be outputted in standart terminal.\n"); }
+    if (DEBUG_MODE)  { printf("[INFO] - DEBUG_MODE is set to true. Progress of tests will be displayed on standard output.\n"); }
 
     gmp_randstate_t randstate; 
     init_randstate(randstate);
@@ -147,6 +156,11 @@ int main() {
             try_n_decomp(ITERATION_NUMBER, randstate);
             try_n_exp_mod(ITERATION_NUMBER, randstate);
 
+            if (DEBUG_MODE){
+                printf("[INFO] - All tests are done ! Exiting child process...\n");
+                fflush(stdout);
+            }  
+
             // -> When done, we signal it to the parent process.
             kill(getppid(), SIGUSR1);
             exit(EXIT_SUCCESS);
@@ -155,7 +169,6 @@ int main() {
             return EXIT_FAILURE;
 
         default:
-
             // Code du processus père (animation)
             loadingAnimation();
 
