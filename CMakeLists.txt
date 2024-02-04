@@ -1,21 +1,24 @@
 cmake_minimum_required(VERSION 3.10)
 project(main)
 
-# Spécifiez la version de C
+# Specify the C version
 set(CMAKE_C_STANDARD 11)
 set(CMAKE_C_STANDARD_REQUIRED ON)
 
-# Définissez le répertoire des sources
+# Set the compilation flags (including -O3)
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
+
+# Define the source directory
 set(SOURCE_DIR src)
 
-# Ajoutez les fichiers sources de GMP à votre projet
+# Add GMP source files to your project
 set(GMP_SOURCE_DIR third-party/gmp)
 
-# Vérifiez si la bibliothèque GMP est déjà installée
+# Check if the GMP library is already installed
 find_library(GMP_LIB gmp)
 
 if(NOT GMP_LIB)
-    # Si GMP n'est pas installé, essayez de l'installer avec apt
+    # If GMP is not installed, try installing it with apt
     message("[INFO] - GMP was not found on the system.")
     message("[INFO] - Installing GMP using apt...")
     
@@ -25,20 +28,20 @@ if(NOT GMP_LIB)
 
     message("${output}")
 
-    # Vérifiez le résultat de l'installation
+    # Check the installation result
     if(result)
         message(FATAL_ERROR "[ERROR] - Error while installing GMP library : ${output}")
     endif()
 endif()
 
-# Collectez les fichiers source de votre projet
+# Collect the source files of your project
 file(GLOB_RECURSE SOURCES ${SOURCE_DIR}/*.c)
 
-# Créez l'exécutable à partir des sources
+# Create the executable from the sources
 add_executable(main ${SOURCES})
 
-# Incluez les en-têtes de votre projet
+# Include the headers of your project
 target_include_directories(main PRIVATE ${SOURCE_DIR})
 
-# Liez l'exécutable à la bibliothèque GMP
+# Link the executable to the GMP library
 target_link_libraries(main gmp)

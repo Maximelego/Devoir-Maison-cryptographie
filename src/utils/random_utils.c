@@ -17,4 +17,3 @@ void generate_big_randomNumber_between_one_and_n_minus_one(mpz_t upper_bound, gm
     mpz_urandomm(number, randstate, n_minus_4);
     mpz_add_ui(number, number, 2);
 }
-

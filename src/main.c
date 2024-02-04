@@ -97,7 +97,7 @@ void try_n_exp_mod(const unsigned long iterations, gmp_randstate_t randstate, un
         generate_big_randomNumber(RANDOM_NUMBERS_SIZE, randstate, n);
         generate_big_randomNumber(RANDOM_NUMBERS_SIZE, randstate, t);
 
-        ExpMod(n, a, t, result);        // TODO : FIX THIS !!!! Too slow, waaaay too slooooow
+        ExpMod(n, a, t, result);
 
         if (LOG_TO_FILE) { 
             log_expmod_to_file(result, n, a, t, file); 
@@ -119,6 +119,92 @@ void try_n_exp_mod(const unsigned long iterations, gmp_randstate_t randstate, un
 
     if (DEBUG_MODE){ printf("[INFO] - Done EXPMOD tests.\n"); }
 }
+
+
+void test_expmods(gmp_randstate_t randstate) {
+    
+    if (DEBUG_MODE){ printf("[INFO] - Starting the 3 EXPMOD tests...\n"); }
+
+    // Variables initialization.
+    unsigned long i = 0;
+    FILE* file;
+    mpz_t a;            bn_init_var(a);
+    mpz_t n;            bn_init_var(n);
+    mpz_t t;            bn_init_var(t);
+    mpz_t my_result;    bn_init_var(my_result);
+    mpz_t gmp_result;    bn_init_var(gmp_result);
+    mpz_t gpt_result;    bn_init_var(gpt_result);
+
+    generate_big_randomNumber(RANDOM_NUMBERS_SIZE, randstate, a);
+    generate_big_randomNumber(RANDOM_NUMBERS_SIZE, randstate, n);
+    generate_big_randomNumber(RANDOM_NUMBERS_SIZE, randstate, t);
+
+    if (LOG_TO_FILE) {
+        file = fopen("output_3expmod.txt", "w");
+    }
+
+
+    // We will try 3 expMods following 3 methods
+    // My EXPMOD
+    ExpMod(n, a, t, my_result);
+    if (LOG_TO_FILE) { 
+        fprintf(file, "My EXPMOD test :\n");
+        fflush(file);
+        log_expmod_to_file(my_result, n, a, t, file); 
+    }
+
+    // The GMP EXPMOD
+    ExpMod_GMP_style(n, a, t, gmp_result);
+    if (LOG_TO_FILE) { 
+        fprintf(file, "GMP EXPMOD test:\n");
+        fflush(file);
+        log_expmod_to_file(gmp_result, n, a, t, file); 
+    }
+
+    // CHATGPT EXPMOD
+    ExpMod_ChatGPT_style(n, a, t, gpt_result);
+    if (LOG_TO_FILE) { 
+        fprintf(file, "CHATGPT EXPMOD test:\n");
+        fflush(file);
+        log_expmod_to_file(gpt_result, n, a, t, file); 
+    }
+
+    if(DEBUG_MODE){
+        if(!(mpz_cmp(gmp_result, my_result) == 0)){
+            printf("[ERROR] - My Result is not the same as GMP !\n");
+            fflush(stdout);
+        } else {
+            printf("[INFO] - My Result is the same as GMP !\n");
+            fflush(stdout);
+        } 
+
+        if(!(mpz_cmp(gmp_result, gpt_result) == 0)){
+            printf("[ERROR] - GPT Result is not the same as GMP !\n");
+            fflush(stdout);
+        } else {
+            printf("[INFO] - GPT Result is the same as GMP !\n");
+            fflush(stdout);
+        } 
+    } 
+    
+    // Freeing vars.
+    bn_free_var(my_result);
+    bn_free_var(gpt_result);
+    bn_free_var(gmp_result);
+    bn_free_var(a);
+    bn_free_var(n);
+    bn_free_var(t);
+
+    if (LOG_TO_FILE) {
+        fclose(file);
+    }
+
+    if (DEBUG_MODE){ printf("[INFO] - Done the 3 EXPMOD tests.\n"); }
+
+} 
+
+
+
 
 
 
@@ -178,6 +264,7 @@ int main() {
             // -> Long operation(s)
             try_n_decomp(ITERATION_NUMBER, randstate, p);
             try_n_exp_mod(ITERATION_NUMBER, randstate, p);
+            test_expmods(randstate);
 
             if (DEBUG_MODE){
                 printf("[INFO] - All tests are done ! Exiting child process...\n");
