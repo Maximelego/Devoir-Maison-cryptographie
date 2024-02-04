@@ -2,14 +2,22 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
+#include <unistd.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/mman.h>
 
 #include "include/constants.h"
 #include "utils/include/random_utils.h"
 #include "utils/include/big_numbers_utils.h"
 #include "utils/include/decomposition.h"
 
+
 int end_flag = 0;       // Flag for ending the loading animation.
+int test_count = 2;     // Number of tests executed.
+
 
 void sigusr1_handler(int signo) {
     if (signo == SIGUSR1) {
@@ -24,7 +32,7 @@ void init_randstate(gmp_randstate_t randstate) {
 }
 
 
-void try_n_decomp(const unsigned long n, gmp_randstate_t randstate) {
+void try_n_decomp(const unsigned long n, gmp_randstate_t randstate, unsigned long* shared_iteration_count) {
 
     if (DEBUG_MODE){ printf("[INFO] - Starting DECOMP tests...\n"); }
 
@@ -50,6 +58,7 @@ void try_n_decomp(const unsigned long n, gmp_randstate_t randstate) {
         }
 
         i ++;
+        *shared_iteration_count += 1;
     }
 
     // Freeing vars.
@@ -65,7 +74,7 @@ void try_n_decomp(const unsigned long n, gmp_randstate_t randstate) {
 }
 
 
-void try_n_exp_mod(const unsigned long iterations, gmp_randstate_t randstate) {
+void try_n_exp_mod(const unsigned long iterations, gmp_randstate_t randstate, unsigned long* shared_iteration_count) {
 
     if (DEBUG_MODE){ printf("[INFO] - Starting EXPMOD tests...\n"); }
 
@@ -95,6 +104,7 @@ void try_n_exp_mod(const unsigned long iterations, gmp_randstate_t randstate) {
         }
 
         i ++;
+        *shared_iteration_count += 1;
     }
 
     // Freeing vars.
@@ -112,17 +122,19 @@ void try_n_exp_mod(const unsigned long iterations, gmp_randstate_t randstate) {
 
 
 
-void loadingAnimation() {
+void loadingAnimation(unsigned long* shared_iteration_count) {
 
     const char* animationStrings[] = {".  ", ".. ", "...", "   "};
     const int numStrings = sizeof(animationStrings) / sizeof(animationStrings[0]);
     const int delayMicroseconds = 500000;  // Délai d'attente entre les états (microsecondes)
+    unsigned long overall_progress = 0;
 
     printf("[INFO] - Computing \n");
 
     while (!end_flag) {
         for (int i = 0; i < numStrings; ++i) {
-            printf("%s\r", animationStrings[i]);  // Utilise \r pour revenir au début de la ligne
+            overall_progress = (*shared_iteration_count * 100) / (test_count * ITERATION_NUMBER);
+            printf("%s  %li%% \r", animationStrings[i], overall_progress);  // Utilise \r pour revenir au début de la ligne
             fflush(stdout);
             usleep(delayMicroseconds);
         }
@@ -143,18 +155,29 @@ int main() {
 
     pid_t child_pid;
 
+    // Shared memory segment.
+    unsigned long *p;
+    // Create a shared memory segment
+    int shm_fd = shm_open("/my_shared_memory", O_CREAT | O_RDWR, 0666);
+    ftruncate(shm_fd, sizeof(unsigned long));
+
+    // Map the shared memory segment into the address space
+    p = (unsigned long *)mmap(NULL, sizeof(unsigned long), PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);    printf("[INFO] - All tests are done ! Exiting child process...1\n");
+    *p = 0;
+
     struct sigaction prepaSignal;
-    prepaSignal.sa_handler=&sigusr1_handler;
+    prepaSignal.sa_handler = &sigusr1_handler;
     prepaSignal.sa_flags=0;
     sigemptyset(&prepaSignal.sa_mask);
     sigaction(SIGUSR1, &prepaSignal, 0);
-    
+
+
     switch(child_pid = fork()) {
         case 0 :
             // Child process.
             // -> Long operation(s)
-            try_n_decomp(ITERATION_NUMBER, randstate);
-            try_n_exp_mod(ITERATION_NUMBER, randstate);
+            try_n_decomp(ITERATION_NUMBER, randstate, p);
+            try_n_exp_mod(ITERATION_NUMBER, randstate, p);
 
             if (DEBUG_MODE){
                 printf("[INFO] - All tests are done ! Exiting child process...\n");
@@ -162,6 +185,7 @@ int main() {
             }  
 
             // -> When done, we signal it to the parent process.
+            munmap(p, sizeof(unsigned long));
             kill(getppid(), SIGUSR1);
             exit(EXIT_SUCCESS);
         case -1: 
@@ -170,11 +194,15 @@ int main() {
 
         default:
             // Code du processus père (animation)
-            loadingAnimation();
+            loadingAnimation(p);
 
             // Attente de la fin du processus fils
             int status;
             waitpid(child_pid, &status, 0);
+
+            // Detach and unlink the shared memory
+            munmap(p, sizeof(unsigned long));
+            shm_unlink("/my_shared_memory");
 
             printf("\n\n# ---- Goodbye ! ---- #\n\n");
             return EXIT_SUCCESS;
