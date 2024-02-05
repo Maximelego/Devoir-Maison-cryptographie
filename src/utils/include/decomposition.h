@@ -6,12 +6,10 @@
 
 #include "gmp.h"
 #include "include/constants.h" 
-#include "big_numbers_utils.h"
 
 void Decomp(const mpz_t n, mpz_t s, mpz_t d);
 
 void ExpMod(const mpz_t n, mpz_t a, mpz_t t, mpz_t result);
-void ExpMod_ChatGPT_style(const mpz_t mod, mpz_t base, mpz_t exponent, mpz_t result);
 void ExpMod_GMP_style(const mpz_t mod, mpz_t base, mpz_t exponent, mpz_t result);
 
 void print_decomp(const mpz_t n, const mpz_t a, const mpz_t d);

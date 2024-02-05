@@ -1,24 +1,24 @@
 #include "include/miller_rabin_test.h"
 
 void free_miller_rabin_vars(mpz_t s, mpz_t d, mpz_t a, mpz_t i, mpz_t res, mpz_t temp) {
-    bn_free_var(s);
-    bn_free_var(d);
-    bn_free_var(a);
-    bn_free_var(i);
-    bn_free_var(res);
-    bn_free_var(temp);
+    mpz_clear(s);
+    mpz_clear(d);
+    mpz_clear(a);
+    mpz_clear(i);
+    mpz_clear(res);
+    mpz_clear(temp);
 }
 
 
-int miller_rabin(mpz_t n, const unsigned long cpt, gmp_randstate_t randstate) {
+int miller_rabin(mpz_t n, gmp_randstate_t randstate) {
 
     // Variables initialization.
-    mpz_t s;            bn_init_var(s);
-    mpz_t d;            bn_init_var(d);
-    mpz_t a;            bn_init_var(a);
-    mpz_t i;            bn_init_var(i);
-    mpz_t res;          bn_init_var(res);
-    mpz_t temp;         bn_init_var(temp);
+    mpz_t s;            mpz_init(s);
+    mpz_t d;            mpz_init(d);
+    mpz_t a;            mpz_init(a);
+    mpz_t i;            mpz_init(i);
+    mpz_t res;          mpz_init(res);
+    mpz_t temp;         mpz_init(temp);
 
     // Main logic.
     // -> Writing n - 1 = 2^sd, with d odd (Decomp method.)
@@ -37,7 +37,8 @@ int miller_rabin(mpz_t n, const unsigned long cpt, gmp_randstate_t randstate) {
     }
 
     mpz_set_ui(i, 1);       // i = 1
-    while(mpz_cmp(i, s)) {
+
+    while(mpz_cmp(i, s) != 0) {
         // Computing a^(d*2^i) mod(n)
         // -> Compute 2^i
         mpz_ui_pow_ui(temp, 2, mpz_get_ui(i));
@@ -56,9 +57,26 @@ int miller_rabin(mpz_t n, const unsigned long cpt, gmp_randstate_t randstate) {
             free_miller_rabin_vars(s, d, a, i, res, temp);
             return 0;
         } 
+
+        mpz_add_ui(i, i, 1);    // i += 1
     }
 
     // If we arrive here, and that a^(d2^i) != 1 mod n, n is not primary. We stop.
     free_miller_rabin_vars(s, d, a, i, res, temp);
     return 0;
+}
+
+
+int MillerRabin(mpz_t n, gmp_randstate_t randstate, int cpt) {
+    int i = 0;
+    while (i < cpt) {
+        if (!miller_rabin(n, randstate)) {
+            // We found a decomposition. The number is composite.
+            return 0;
+        }
+        i++;
+    } 
+
+    // If we reached here, we did not found a composite for the number, it is probably primary.
+    return 1;
 }

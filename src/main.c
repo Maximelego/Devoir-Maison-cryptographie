@@ -11,12 +11,12 @@
 
 #include "include/constants.h"
 #include "utils/include/random_utils.h"
-#include "utils/include/big_numbers_utils.h"
 #include "utils/include/decomposition.h"
+#include "utils/include/miller_rabin_test.h"
 
 
 int end_flag = 0;       // Flag for ending the loading animation.
-int test_count = 2;     // Number of tests executed.
+int total_test_iter = (2 * ITERATION_NUMBER) + 2 + 3 ;
 
 
 void sigusr1_handler(int signo) {
@@ -39,9 +39,9 @@ void try_n_decomp(const unsigned long n, gmp_randstate_t randstate, unsigned lon
     // Variables initialization.
     unsigned long i = 0;
     FILE* file;
-    mpz_t random_number; bn_init_var(random_number);
-    mpz_t s;             bn_init_var(s);
-    mpz_t d;             bn_init_var(d);
+    mpz_t random_number; mpz_init(random_number);
+    mpz_t s;             mpz_init(s);
+    mpz_t d;             mpz_init(d);
 
     if (LOG_TO_FILE) {
         file = fopen("output_decomp.txt", "w");
@@ -62,9 +62,9 @@ void try_n_decomp(const unsigned long n, gmp_randstate_t randstate, unsigned lon
     }
 
     // Freeing vars.
-    bn_free_var(random_number);
-    bn_free_var(s);
-    bn_free_var(d);
+    mpz_clear(random_number);
+    mpz_clear(s);
+    mpz_clear(d);
 
     if (LOG_TO_FILE) {
         fclose(file);
@@ -81,10 +81,10 @@ void try_n_exp_mod(const unsigned long iterations, gmp_randstate_t randstate, un
     // Variables initialization.
     unsigned long i = 0;
     FILE* file;
-    mpz_t a;        bn_init_var(a);
-    mpz_t n;        bn_init_var(n);
-    mpz_t t;        bn_init_var(t);
-    mpz_t result;   bn_init_var(result);
+    mpz_t a;        mpz_init(a);
+    mpz_t n;        mpz_init(n);
+    mpz_t t;        mpz_init(t);
+    mpz_t result;   mpz_init(result);
 
     if (LOG_TO_FILE) {
         file = fopen("output_expmod.txt", "w");
@@ -108,10 +108,10 @@ void try_n_exp_mod(const unsigned long iterations, gmp_randstate_t randstate, un
     }
 
     // Freeing vars.
-    bn_free_var(result);
-    bn_free_var(a);
-    bn_free_var(n);
-    bn_free_var(t);
+    mpz_clear(result);
+    mpz_clear(a);
+    mpz_clear(n);
+    mpz_clear(t);
 
     if (LOG_TO_FILE) {
         fclose(file);
@@ -121,28 +121,25 @@ void try_n_exp_mod(const unsigned long iterations, gmp_randstate_t randstate, un
 }
 
 
-void test_expmods(gmp_randstate_t randstate) {
+void test_expmods(gmp_randstate_t randstate, unsigned long* shared_iteration_count) {
     
     if (DEBUG_MODE){ printf("[INFO] - Starting the 3 EXPMOD tests...\n"); }
 
     // Variables initialization.
-    unsigned long i = 0;
     FILE* file;
-    mpz_t a;            bn_init_var(a);
-    mpz_t n;            bn_init_var(n);
-    mpz_t t;            bn_init_var(t);
-    mpz_t my_result;    bn_init_var(my_result);
-    mpz_t gmp_result;    bn_init_var(gmp_result);
-    mpz_t gpt_result;    bn_init_var(gpt_result);
+    mpz_t a;            mpz_init(a);
+    mpz_t n;            mpz_init(n);
+    mpz_t t;            mpz_init(t);
+    mpz_t my_result;    mpz_init(my_result);
+    mpz_t gmp_result;   mpz_init(gmp_result);
 
     generate_big_randomNumber(RANDOM_NUMBERS_SIZE, randstate, a);
     generate_big_randomNumber(RANDOM_NUMBERS_SIZE, randstate, n);
     generate_big_randomNumber(RANDOM_NUMBERS_SIZE, randstate, t);
 
     if (LOG_TO_FILE) {
-        file = fopen("output_3expmod.txt", "w");
+        file = fopen("output_2expmod.txt", "w");
     }
-
 
     // We will try 3 expMods following 3 methods
     // My EXPMOD
@@ -152,6 +149,7 @@ void test_expmods(gmp_randstate_t randstate) {
         fflush(file);
         log_expmod_to_file(my_result, n, a, t, file); 
     }
+    *shared_iteration_count += 1;
 
     // The GMP EXPMOD
     ExpMod_GMP_style(n, a, t, gmp_result);
@@ -160,14 +158,7 @@ void test_expmods(gmp_randstate_t randstate) {
         fflush(file);
         log_expmod_to_file(gmp_result, n, a, t, file); 
     }
-
-    // CHATGPT EXPMOD
-    ExpMod_ChatGPT_style(n, a, t, gpt_result);
-    if (LOG_TO_FILE) { 
-        fprintf(file, "CHATGPT EXPMOD test:\n");
-        fflush(file);
-        log_expmod_to_file(gpt_result, n, a, t, file); 
-    }
+    *shared_iteration_count += 1;
 
     if(DEBUG_MODE){
         if(!(mpz_cmp(gmp_result, my_result) == 0)){
@@ -176,34 +167,75 @@ void test_expmods(gmp_randstate_t randstate) {
         } else {
             printf("[INFO] - My Result is the same as GMP !\n");
             fflush(stdout);
-        } 
-
-        if(!(mpz_cmp(gmp_result, gpt_result) == 0)){
-            printf("[ERROR] - GPT Result is not the same as GMP !\n");
-            fflush(stdout);
-        } else {
-            printf("[INFO] - GPT Result is the same as GMP !\n");
-            fflush(stdout);
-        } 
+        }
     } 
     
     // Freeing vars.
-    bn_free_var(my_result);
-    bn_free_var(gpt_result);
-    bn_free_var(gmp_result);
-    bn_free_var(a);
-    bn_free_var(n);
-    bn_free_var(t);
+    mpz_clear(my_result);
+    mpz_clear(gmp_result);
+    mpz_clear(a);
+    mpz_clear(n);
+    mpz_clear(t);
 
-    if (LOG_TO_FILE) {
-        fclose(file);
-    }
-
-    if (DEBUG_MODE){ printf("[INFO] - Done the 3 EXPMOD tests.\n"); }
-
+    if (LOG_TO_FILE) { fclose(file); }
+    if (DEBUG_MODE)  { printf("[INFO] - Done the 3 EXPMOD tests.\n"); }
 } 
 
 
+void try_miller_rabin(gmp_randstate_t randstate, unsigned long* shared_iteration_count ) {
+    if (DEBUG_MODE){ printf("[INFO] - Starting the Miller Rabin tests...\n"); }
+
+    // Variables initialization.
+    FILE* file;
+    mpz_t v1;            mpz_init_set_str(v1, "FFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD129024E088A67CC74020BBEA63B139B22514A08798E3404DDEF9519B3CD3A431B302B0A6DF25F14374FE1356D6D51C245E485B576625E7EC6F44C42E9A63A3620FFFFFFFFFFFFFFFF", 16);
+    mpz_t v2;            mpz_init_set_str(v2, "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEC4FFFFFDAF0000000000000000000000000000000000000000000000000000000000000000000000000000000000000002D9AB", 16);
+    mpz_t v3;            mpz_init_set_str(v3, "FFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD129024E088A67CC74020BBEA63B139B22514A08798E3404DDEF9519B3CD3A431B302B0A6DF25F14374FE1356D6D51C245E485B576625E7EC6F44C42E9A637ED6B0BFF5CB6F406B7EDEE386BFB5A899FA5AE9F24117C4B1FE649286651ECE65381FFFFFFFFFFFFFFFF", 16);
+    int v1_res = 0;
+    int v2_res = 0;
+    int v3_res = 0;
+
+    if (LOG_TO_FILE) { file = fopen("output_millerrabin.txt", "w"); }
+
+    // Test on V1
+    v1_res = MillerRabin(v1, randstate, MILLER_RABIN_ITERATIONS);
+    *shared_iteration_count += 1;
+    // Test on V2
+    v2_res = MillerRabin(v2, randstate, MILLER_RABIN_ITERATIONS);
+    *shared_iteration_count += 1;
+    // Test on V3
+    v3_res = MillerRabin(v3, randstate, MILLER_RABIN_ITERATIONS);
+    *shared_iteration_count += 1;
+
+    if (DEBUG_MODE) {
+        printf("[INFO] - MillerRabin result for n1 : %i\n", v1_res);
+        printf("[INFO] - MillerRabin result for n2 : %i\n", v2_res);
+        printf("[INFO] - MillerRabin result for n3 : %i\n", v3_res);
+    }
+
+    v1_res = mpz_probab_prime_p(v1, MILLER_RABIN_ITERATIONS);
+    v2_res = mpz_probab_prime_p(v2, MILLER_RABIN_ITERATIONS);
+    v3_res = mpz_probab_prime_p(v3, MILLER_RABIN_ITERATIONS);
+
+    if (DEBUG_MODE) {
+        printf("[INFO] - MillerRabin result for n1 should be : %i\n", v1_res);
+        printf("[INFO] - MillerRabin result for n2 should be : %i\n", v2_res);
+        printf("[INFO] - MillerRabin result for n3 should be : %i\n", v3_res);
+    }
+
+    if (LOG_TO_FILE) {
+        fprintf(file, "MillerRabin result for n1 : %i\n", v1_res);
+        fprintf(file, "MillerRabin result for n2 : %i\n", v2_res);
+        fprintf(file, "MillerRabin result for n3 : %i\n", v3_res);
+    }
+
+    // Freeing vars.
+    mpz_clear(v1);
+    mpz_clear(v2);
+    mpz_clear(v3);
+
+    if (LOG_TO_FILE) { fclose(file); }
+    if (DEBUG_MODE)  { printf("[INFO] - Done the Miller Rabin tests.\n"); }
+} 
 
 
 
@@ -219,7 +251,7 @@ void loadingAnimation(unsigned long* shared_iteration_count) {
 
     while (!end_flag) {
         for (int i = 0; i < numStrings; ++i) {
-            overall_progress = (*shared_iteration_count * 100) / (test_count * ITERATION_NUMBER);
+            overall_progress = (*shared_iteration_count * 100) / total_test_iter;
             printf("%s  %li%% \r", animationStrings[i], overall_progress);  // Utilise \r pour revenir au début de la ligne
             fflush(stdout);
             usleep(delayMicroseconds);
@@ -265,6 +297,7 @@ int main() {
             try_n_decomp(ITERATION_NUMBER, randstate, p);
             try_n_exp_mod(ITERATION_NUMBER, randstate, p);
             test_expmods(randstate);
+            try_miller_rabin(randstate);
 
             if (DEBUG_MODE){
                 printf("[INFO] - All tests are done ! Exiting child process...\n");

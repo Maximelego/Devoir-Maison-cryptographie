@@ -4,3 +4,5 @@
 rm -r ./build
 rm output_decomp.txt
 rm output_expmod.txt
+rm output_2expmod.txt
+rm output_millerabin.txt

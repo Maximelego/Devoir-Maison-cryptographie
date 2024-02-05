@@ -11,6 +11,8 @@ build
 # Output files
 output_decomp.txt
 output_expmod.txt
+output_2expmod.txt
+output_millerrabin.txt
 
 # IDE configs
 .idea
