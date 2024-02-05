@@ -13,6 +13,7 @@ output_decomp.txt
 output_expmod.txt
 output_2expmod.txt
 output_millerrabin.txt
+output_eval.txt
 
 # IDE configs
 .idea

@@ -80,3 +80,20 @@ int MillerRabin(mpz_t n, gmp_randstate_t randstate, int cpt) {
     // If we reached here, we did not found a composite for the number, it is probably primary.
     return 1;
 }
+
+
+int Eval(gmp_randstate_t randstate, int cpt, int b) {
+    // Variables
+    int i = 0;
+    mpz_t random_number;        mpz_init(random_number);
+
+    generate_big_randomNumber(b, randstate, random_number);
+
+    while(MillerRabin(random_number, randstate, cpt) == 0) {
+        i++;
+        generate_big_randomNumber(b, randstate, random_number);
+    }
+
+    mpz_clear(random_number);
+    return i;
+}
