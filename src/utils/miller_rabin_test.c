@@ -30,7 +30,7 @@ int miller_rabin(mpz_t n, gmp_randstate_t randstate) {
     // Computing a^d mod(n)
     ExpMod(n, a, d, res);
 
-    if (mpz_cmp_ui(res, 1) || mpz_cmp_ui(res, -1)) {
+    if (mpz_cmp_ui(res, 1) == 0 || mpz_cmp_ui(res, -1) == 0) {
         // Probably primary, we stop.
         free_miller_rabin_vars(s, d, a, i, res, temp);
         return 1;
@@ -38,7 +38,7 @@ int miller_rabin(mpz_t n, gmp_randstate_t randstate) {
 
     mpz_set_ui(i, 1);       // i = 1
 
-    while(mpz_cmp(i, s) != 0) {
+    while(mpz_cmp(i, s) < 0) {
         // Computing a^(d*2^i) mod(n)
         // -> Compute 2^i
         mpz_ui_pow_ui(temp, 2, mpz_get_ui(i));
@@ -48,12 +48,12 @@ int miller_rabin(mpz_t n, gmp_randstate_t randstate) {
         ExpMod(n, a, temp, res);
 
         // If it is = -1 mod n, probably primary.
-        if (mpz_cmp_ui(res, -1)) {
+        if (mpz_cmp_ui(res, -1) == 0) {
             free_miller_rabin_vars(s, d, a, i, res, temp);
             return 1;
         } 
         // If it is = -1 mod n, not primary.
-        if (mpz_cmp_ui(res, 1)) {
+        if (mpz_cmp_ui(res, 1) == 0) {
             free_miller_rabin_vars(s, d, a, i, res, temp);
             return 0;
         } 

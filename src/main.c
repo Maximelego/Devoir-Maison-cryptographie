@@ -42,6 +42,7 @@ void try_n_decomp(const unsigned long n, gmp_randstate_t randstate, unsigned lon
     mpz_t random_number; mpz_init(random_number);
     mpz_t s;             mpz_init(s);
     mpz_t d;             mpz_init(d);
+    mpz_t temp;          mpz_init(temp);
 
     if (LOG_TO_FILE) {
         file = fopen("output_decomp.txt", "w");
@@ -51,7 +52,8 @@ void try_n_decomp(const unsigned long n, gmp_randstate_t randstate, unsigned lon
     while (i < n) {
         generate_big_randomNumber(RANDOM_NUMBERS_SIZE, randstate, random_number);
         Decomp(random_number, s, d);
-        // print_decomp(random_number, s, d);
+
+        
 
         if (LOG_TO_FILE) { 
             log_decomp_to_file(random_number, s, d, file); 
@@ -65,6 +67,7 @@ void try_n_decomp(const unsigned long n, gmp_randstate_t randstate, unsigned lon
     mpz_clear(random_number);
     mpz_clear(s);
     mpz_clear(d);
+    mpz_clear(temp);
 
     if (LOG_TO_FILE) {
         fclose(file);
@@ -296,8 +299,8 @@ int main() {
             // -> Long operation(s)
             try_n_decomp(ITERATION_NUMBER, randstate, p);
             try_n_exp_mod(ITERATION_NUMBER, randstate, p);
-            test_expmods(randstate);
-            try_miller_rabin(randstate);
+            test_expmods(randstate, p);
+            try_miller_rabin(randstate, p);
 
             if (DEBUG_MODE){
                 printf("[INFO] - All tests are done ! Exiting child process...\n");

@@ -5,13 +5,13 @@ void Decomp(const mpz_t n, mpz_t s, mpz_t d) {
     mpz_t temp;     mpz_init(temp);
 
     mpz_set_ui(s, 0);           // s = 0
-    mpz_set(temp, n);           // temp  = n
+    mpz_set(temp, n);           // temp = n
     mpz_sub_ui(temp, temp, 1);  // temp = temp - 1
 
     // Calcul de s et d
-    while (mpz_even_p(temp)) {          // while temp %2 == 0
+    while (mpz_even_p(temp) == 0) {     // while temp %2 == 0
         mpz_add_ui(s, s, 1);            //      s = s + 1
-        mpz_divexact_ui(temp, temp, 2); //      temp = temp / 2
+        mpz_div_ui(temp, temp, 2);      //      temp = temp / 2
     }
 
     mpz_set(d, temp);           // d = temp
