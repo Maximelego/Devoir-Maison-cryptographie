@@ -1,5 +1,5 @@
 #include "include/test_to_do.h"
-
+#include <omp.h>
 
 void try_n_decomp(const unsigned long n, gmp_randstate_t randstate, unsigned long* shared_iteration_count) {
 
@@ -68,6 +68,8 @@ void try_n_exp_mod(const unsigned long iterations, gmp_randstate_t randstate, un
         generate_big_randomNumber(RANDOM_NUMBERS_SIZE, randstate, t);
 
         ExpMod(n, a, t, result);
+        // ExpMod_GMP_style(n, a, t, result);
+
 
         if (LOG_TO_FILE) { 
             log_expmod_to_file(result, n, a, t, file); 
@@ -138,8 +140,9 @@ void test_expmods(gmp_randstate_t randstate, unsigned long* shared_iteration_cou
             printf("[INFO] - My Result is the same as GMP !\n");
             fflush(stdout);
         }
-    } 
-    
+    }
+    *shared_iteration_count += 1;
+
     // Freeing vars.
     mpz_clear(my_result);
     mpz_clear(gmp_result);
@@ -160,6 +163,7 @@ void try_miller_rabin(gmp_randstate_t randstate, unsigned long* shared_iteration
     mpz_t v1;            mpz_init_set_str(v1, "FFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD129024E088A67CC74020BBEA63B139B22514A08798E3404DDEF9519B3CD3A431B302B0A6DF25F14374FE1356D6D51C245E485B576625E7EC6F44C42E9A63A3620FFFFFFFFFFFFFFFF", 16);
     mpz_t v2;            mpz_init_set_str(v2, "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEC4FFFFFDAF0000000000000000000000000000000000000000000000000000000000000000000000000000000000000002D9AB", 16);
     mpz_t v3;            mpz_init_set_str(v3, "FFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD129024E088A67CC74020BBEA63B139B22514A08798E3404DDEF9519B3CD3A431B302B0A6DF25F14374FE1356D6D51C245E485B576625E7EC6F44C42E9A637ED6B0BFF5CB6F406B7EDEE386BFB5A899FA5AE9F24117C4B1FE649286651ECE65381FFFFFFFFFFFFFFFF", 16);
+    
     int v1_res = 0;
     int v2_res = 0;
     int v3_res = 0;
@@ -203,7 +207,6 @@ void test_eval(gmp_randstate_t randstate, unsigned long* shared_iteration_count)
 
     if (DEBUG_MODE) { printf("[INFO] - Starting Eval tests...\n"); }
 
-    // Variables initialization.
     FILE* file;
     int b = 128;
     int i = 0;
@@ -211,21 +214,35 @@ void test_eval(gmp_randstate_t randstate, unsigned long* shared_iteration_count)
 
     if (LOG_TO_FILE) { file = fopen("output_eval.txt", "w"); }
 
-    while(b <= 4096) {
-        while(i < 100) {
-            result = Eval(randstate, MILLER_RABIN_ITERATIONS, b);
+    while (b <= 4096) {
+        int max_threads = ALLOCATED_CORES;  // Adjust the threshold as needed
+
+        // Use OpenMP to parallelize the inner loop with dynamic scheduling
+        #pragma omp parallel for num_threads(max_threads) schedule(dynamic)
+        for (int j = 0; j < 100; ++j) {
+            int local_b;
+            #pragma omp critical
+            {
+                local_b = b;
+            }
+
+            result = Eval(randstate, MILLER_RABIN_ITERATIONS, local_b);
 
             if (LOG_TO_FILE) { 
-                fprintf(file, "Test for Eval : result = %i | b = %i\n", result, b);
+                #pragma omp critical
+                {
+                    fprintf(file, "Test for Eval : result = %i | b = %i\n", result, local_b);
+                    fflush(file);
+                }
             }
-            i++;
+
+            #pragma omp atomic
             *shared_iteration_count += 1;
         }
-        if (LOG_TO_FILE) { 
-            fprintf(file, "\n\n");
-        }
+
+        if (LOG_TO_FILE) { fprintf(file, "\n\n"); }
+
         b *= 2;
-        i = 0;
     }
 
     if (LOG_TO_FILE) { fclose(file); }

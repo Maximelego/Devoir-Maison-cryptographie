@@ -70,7 +70,6 @@ void ExpMod_GMP_style(const mpz_t mod, mpz_t base, mpz_t exponent, mpz_t result)
 }
 
 
-
 void print_decomp(const mpz_t n, const mpz_t s, const mpz_t d) {
     gmp_printf("[RESULT] - Decomposition of n = %Zd : \n", n);
     gmp_printf("         - s = %Zd\n", s);

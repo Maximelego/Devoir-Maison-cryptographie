@@ -8,6 +8,7 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/mman.h>
+#include <sys/time.h>
 
 #include "include/constants.h"
 #include "utils/include/random_utils.h"
@@ -33,17 +34,17 @@ void init_randstate(gmp_randstate_t randstate) {
 
 void loadingAnimation(unsigned long* shared_iteration_count) {
 
-    const char* animationStrings[] = {".  ", ".. ", "...", "   "};
+    const char* animationStrings[] = {".  ", "..  ", "... ", "....", "    "};
     const int numStrings = sizeof(animationStrings) / sizeof(animationStrings[0]);
     const int delayMicroseconds = 200000;  // Délai d'attente entre les états (microsecondes)
-    unsigned long overall_progress = 0;
+    float overall_progress = 0.;
 
     printf("[INFO] - Computing \n");
 
     while (!end_flag) {
         for (int i = 0; i < numStrings; ++i) {
-            overall_progress = (*shared_iteration_count * 100) / total_test_iter;
-            printf("[PROGRESS] - %li%%   %s\r", overall_progress, animationStrings[i]);  // Utilise \r pour revenir au début de la ligne
+            overall_progress = (float) (*shared_iteration_count * 100) / total_test_iter;
+            printf("[PROGRESS] - %.2f%%   %s\r", overall_progress, animationStrings[i]);  // Utilise \r pour revenir au début de la ligne
             fflush(stdout);
             usleep(delayMicroseconds);
         }
@@ -63,6 +64,14 @@ int main() {
 
     printf("\n\n# ---- Welcome ! ---- #\n\n\n");
 
+    struct timeval t1, t2;
+    double elapsedTime;
+
+    if (DEBUG_MODE) {
+        // Start timer
+        gettimeofday(&t1, NULL);
+    }
+
     if (LOG_TO_FILE) { printf("[INFO] - LOG_TO_FILE is set to true. Results will be outputted into an output.txt file.\n"); }
     if (DEBUG_MODE)  { printf("[INFO] - DEBUG_MODE is set to true. Progress of tests will be displayed on standard output.\n"); }
 
@@ -75,7 +84,7 @@ int main() {
     unsigned long *p;
     // Create a shared memory segment
     int shm_fd = shm_open("/my_shared_memory", O_CREAT | O_RDWR, 0666);
-    ftruncate(shm_fd, sizeof(unsigned long));
+    int t = ftruncate(shm_fd, sizeof(unsigned long));
 
     // Map the shared memory segment into the address space
     p = (unsigned long *)mmap(NULL, sizeof(unsigned long), PROT_READ | PROT_WRITE, MAP_SHARED, shm_fd, 0);
@@ -117,6 +126,16 @@ int main() {
             // Detach and unlink the shared memory
             munmap(p, sizeof(unsigned long));
             shm_unlink("/my_shared_memory");
+
+
+            if (DEBUG_MODE) {
+                // Stop timer
+                gettimeofday(&t2, NULL);
+
+                // Compute and print the elapsed time in
+                elapsedTime = (t2.tv_sec - t1.tv_sec);
+                printf("[INFO] - Time elapsed : %2.f s.\n", elapsedTime);
+            }
 
             printf("\n\n# ---- Goodbye ! ---- #\n\n");
             return EXIT_SUCCESS;

@@ -10,15 +10,7 @@ void free_miller_rabin_vars(mpz_t s, mpz_t d, mpz_t a, mpz_t i, mpz_t res, mpz_t
 }
 
 
-int miller_rabin(mpz_t n, gmp_randstate_t randstate) {
-
-    // Variables initialization.
-    mpz_t s;            mpz_init(s);
-    mpz_t d;            mpz_init(d);
-    mpz_t a;            mpz_init(a);
-    mpz_t i;            mpz_init(i);
-    mpz_t res;          mpz_init(res);
-    mpz_t temp;         mpz_init(temp);
+int miller_rabin(mpz_t n, mpz_t s, mpz_t d, mpz_t a, mpz_t i, mpz_t res, mpz_t temp, gmp_randstate_t randstate) {
 
     // Main logic.
     // -> Writing n - 1 = 2^sd, with d odd (Decomp method.)
@@ -28,11 +20,10 @@ int miller_rabin(mpz_t n, gmp_randstate_t randstate) {
     generate_big_randomNumber_between_one_and_n_minus_one(n, randstate, a);
 
     // Computing a^d mod(n)
-    ExpMod(n, a, d, res);
+    ExpMod_GMP_style(n, a, d, res);     // Using the GMP method to make tests faster.
 
-    if (mpz_cmp_ui(res, 1) == 0 || mpz_cmp_ui(res, -1) == 0) {
+    if (mpz_cmpabs_ui(res, 1) == 0) {       // If res == -1 or 1
         // Probably primary, we stop.
-        free_miller_rabin_vars(s, d, a, i, res, temp);
         return 1;
     }
 
@@ -49,12 +40,10 @@ int miller_rabin(mpz_t n, gmp_randstate_t randstate) {
 
         // If it is = -1 mod n, probably primary.
         if (mpz_cmp_ui(res, -1) == 0) {
-            free_miller_rabin_vars(s, d, a, i, res, temp);
             return 1;
         } 
         // If it is = -1 mod n, not primary.
         if (mpz_cmp_ui(res, 1) == 0) {
-            free_miller_rabin_vars(s, d, a, i, res, temp);
             return 0;
         } 
 
@@ -62,20 +51,30 @@ int miller_rabin(mpz_t n, gmp_randstate_t randstate) {
     }
 
     // If we arrive here, and that a^(d2^i) != 1 mod n, n is not primary. We stop.
-    free_miller_rabin_vars(s, d, a, i, res, temp);
     return 0;
 }
 
 
 int MillerRabin(mpz_t n, gmp_randstate_t randstate, int cpt) {
-    int i = 0;
-    while (i < cpt) {
-        if (!miller_rabin(n, randstate)) {
+    int iter = 0;
+
+    // Variables initialization.
+    mpz_t s;            mpz_init(s);
+    mpz_t d;            mpz_init(d);
+    mpz_t a;            mpz_init(a);
+    mpz_t i;            mpz_init(i);
+    mpz_t res;          mpz_init(res);
+    mpz_t temp;         mpz_init(temp);
+
+    while (iter < cpt) {
+        if (!miller_rabin(n, s, d, a, i, res, temp, randstate)) {
             // We found a decomposition. The number is composite.
             return 0;
         }
-        i++;
+        iter ++;
     } 
+
+    free_miller_rabin_vars(s, d, a, i, res, temp);
 
     // If we reached here, we did not found a composite for the number, it is probably primary.
     return 1;
@@ -85,11 +84,12 @@ int MillerRabin(mpz_t n, gmp_randstate_t randstate, int cpt) {
 int Eval(gmp_randstate_t randstate, int cpt, int b) {
     // Variables
     int i = 0;
-    mpz_t random_number;        mpz_init(random_number);
+    mpz_t random_number;    mpz_init(random_number);
 
     generate_big_randomNumber(b, randstate, random_number);
 
     while(MillerRabin(random_number, randstate, cpt) == 0) {
+    // while(mpz_probab_prime_p(random_number, 20) == 0) {
         i++;
         generate_big_randomNumber(b, randstate, random_number);
     }
