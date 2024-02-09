@@ -44,7 +44,7 @@ void loadingAnimation(unsigned long* shared_iteration_count) {
     while (!end_flag) {
         for (int i = 0; i < numStrings; ++i) {
             overall_progress = (float) (*shared_iteration_count * 100) / total_test_iter;
-            printf("[PROGRESS] - %.2f%%   %s\r", overall_progress, animationStrings[i]);  // Utilise \r pour revenir au début de la ligne
+            printf("[PROGRESS] - %.3f%%   %s\r", overall_progress, animationStrings[i]);  // Utilise \r pour revenir au début de la ligne
             fflush(stdout);
             usleep(delayMicroseconds);
         }
