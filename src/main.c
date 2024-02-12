@@ -52,11 +52,22 @@ void loadingAnimation(unsigned long* shared_iteration_count) {
 }
 
 void run_all_tests(gmp_randstate_t randstate, unsigned long* p) {
+
+    // Tests for N Decomp() method calls.
     try_n_decomp(ITERATION_NUMBER, randstate, p);
+
+    // Tests for N ExpMod() method calls.
     try_n_exp_mod(ITERATION_NUMBER, randstate, p);
+
+    // Test to check that ExpMod returns the result it should return.
     test_expmods(randstate, p);
+
+    // Test for the 3 values for the Prime nmber test of Miller Rabin
     try_miller_rabin(randstate, p);
+
+    // Test for the 600 iterations of the Eval() method.
     test_eval(randstate, p);
+    
 }
 
 

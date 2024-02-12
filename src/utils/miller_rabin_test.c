@@ -88,8 +88,8 @@ int Eval(gmp_randstate_t randstate, int cpt, int b) {
 
     generate_big_randomNumber(b, randstate, random_number);
 
-    // while(mpz(random_number, randstate, cpt) == 0) {
-    while(mpz_probab_prime_p(random_number, 20) == 0) {
+    while(MillerRabin(random_number, randstate, cpt) == 0) {
+    // while(mpz_probab_prime_p(random_number, 20) == 0) {
         i++;
         generate_big_randomNumber(b, randstate, random_number);
     }
