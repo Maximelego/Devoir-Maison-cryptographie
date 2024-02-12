@@ -2,18 +2,13 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
-#include <unistd.h>
-#include <errno.h>
 #include <fcntl.h>
-#include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/mman.h>
 #include <sys/time.h>
 
 #include "include/constants.h"
 #include "utils/include/random_utils.h"
-#include "utils/include/decomposition.h"
-#include "utils/include/miller_rabin_test.h"
 #include "test_to_do/include/test_to_do.h"
 
 
@@ -32,18 +27,18 @@ void init_randstate(gmp_randstate_t randstate) {
     gmp_randseed_ui(randstate, RANDOM_SEED);
 }
 
-void loadingAnimation(unsigned long* shared_iteration_count) {
+void loadingAnimation(const unsigned long* shared_iteration_count) {
 
     const char* animationStrings[] = {".  ", "..  ", "... ", "....", "    "};
     const int numStrings = sizeof(animationStrings) / sizeof(animationStrings[0]);
     const int delayMicroseconds = 200000;  // Délai d'attente entre les états (microsecondes)
-    float overall_progress = 0.;
+    float overall_progress;
 
     printf("[INFO] - Computing \n");
 
     while (!end_flag) {
         for (int i = 0; i < numStrings; ++i) {
-            overall_progress = (float) (*shared_iteration_count * 100) / total_test_iter;
+            overall_progress = (float) (*shared_iteration_count * 100) / (float) total_test_iter;
             printf("[PROGRESS] - %.3f%%   %s\r", overall_progress, animationStrings[i]);  // Utilise \r pour revenir au début de la ligne
             fflush(stdout);
             usleep(delayMicroseconds);
@@ -144,8 +139,8 @@ int main() {
                 gettimeofday(&t2, NULL);
 
                 // Compute and print the elapsed time in
-                elapsedTime = (t2.tv_sec - t1.tv_sec);
-                printf("[INFO] - Time elapsed : %2.f s.\n", elapsedTime);
+                elapsedTime = (double) (t2.tv_sec - t1.tv_sec);
+                printf("[INFO] - Time elapsed : %li min : %2ld s.\n", (long) elapsedTime/60 , (long) elapsedTime % 60);
             }
 
             printf("\n\n# ---- Goodbye ! ---- #\n\n");

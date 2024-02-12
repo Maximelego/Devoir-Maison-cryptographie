@@ -1,5 +1,4 @@
 #include "include/test_to_do.h"
-#include <omp.h>
 
 void try_n_decomp(const unsigned long n, gmp_randstate_t randstate, unsigned long* shared_iteration_count) {
 
@@ -69,7 +68,6 @@ void try_n_exp_mod(const unsigned long iterations, gmp_randstate_t randstate, un
 
         ExpMod(n, a, t, result);
         // ExpMod_GMP_style(n, a, t, result);
-
 
         if (LOG_TO_FILE) { 
             log_expmod_to_file(result, n, a, t, file); 
