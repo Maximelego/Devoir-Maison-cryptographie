@@ -76,7 +76,7 @@ int MillerRabin(mpz_t n, gmp_randstate_t randstate, int cpt) {
 
     free_miller_rabin_vars(s, d, a, i, res, temp);
 
-    // If we reached here, we did not found a composite for the number, it is probably primary.
+    // If we reached here, we did not find a composite for the number, it is probably primary.
     return 1;
 }
 
