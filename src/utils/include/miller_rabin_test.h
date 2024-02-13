@@ -6,6 +6,6 @@
 #include "random_utils.h"
 
 int MillerRabin(mpz_t n, gmp_randstate_t randstate, int cpt);
-int Eval(gmp_randstate_t randstate, int cpt, int b);
+int Eval(gmp_randstate_t randstate, int cpt, int b, int fast_mode);
 
 #endif

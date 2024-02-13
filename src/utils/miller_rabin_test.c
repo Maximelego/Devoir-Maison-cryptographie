@@ -81,17 +81,23 @@ int MillerRabin(mpz_t n, gmp_randstate_t randstate, int cpt) {
 }
 
 
-int Eval(gmp_randstate_t randstate, int cpt, int b) {
+int Eval(gmp_randstate_t randstate, int cpt, int b, const int fast_mode) {
     // Variables
     int i = 0;
     mpz_t random_number;    mpz_init(random_number);
 
     generate_big_randomNumber(b, randstate, random_number);
 
-    while(MillerRabin(random_number, randstate, cpt) == 0) {
-    // while(mpz_probab_prime_p(random_number, 20) == 0) {
-        i++;
-        generate_big_randomNumber(b, randstate, random_number);
+    if (fast_mode) {
+        while(mpz_probab_prime_p(random_number, 20) == 0) {
+            i++;
+            generate_big_randomNumber(b, randstate, random_number);
+        }
+    } else {
+        while(MillerRabin(random_number, randstate, cpt) == 0) {
+            i++;
+            generate_big_randomNumber(b, randstate, random_number);
+        }
     }
 
     mpz_clear(random_number);
