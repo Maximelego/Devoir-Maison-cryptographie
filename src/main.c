@@ -132,7 +132,7 @@ int main(int argc, char* argv[]) {
 
         case 3:
             ((strcmp(argv[1], "-f") == 0) || (strcmp(argv[2], "-f") == 0)) ? (fast_mode = 1) : (fast_mode = 0);
-            ((strcmp(argv[1], "-t") == 0) || (strcmp(argv[2], "-t") == 0))? (threaded_mode = 1) : (threaded_mode = 0);
+            ((strcmp(argv[1], "-t") == 0) || (strcmp(argv[2], "-t") == 0)) ? (threaded_mode = 1) : (threaded_mode = 0);
             break;
 
         default:

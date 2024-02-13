@@ -101,13 +101,14 @@ void try_n_decomp_parallel(const unsigned long n, gmp_randstate_t randstate, uns
 
     // Variables initialization.
     FILE* file;
+    int max_threads = (ALLOCATED_CORES < 1) ? 1 : ALLOCATED_CORES;  // Adjust the threshold as needed
 
     if (LOG_TO_FILE) {
         file = fopen("output_decomp.txt", "w");
     }
 
     // Doing the N loop in parallel.
-    #pragma omp parallel for num_threads(ALLOCATED_CORES) schedule(dynamic)
+    #pragma omp parallel for num_threads(max_threads) schedule(dynamic)
     for (unsigned long i = 0; i < n; i++) {
         mpz_t local_random_number;          mpz_init(local_random_number);
         mpz_t local_s;                      mpz_init(local_s);
@@ -150,13 +151,14 @@ void try_n_exp_mod_parallel(const unsigned long iterations, gmp_randstate_t rand
 
     // Variables initialization.
     FILE* file;
+    int max_threads = (ALLOCATED_CORES < 1) ? 1 : ALLOCATED_CORES;  // Adjust the threshold as needed
 
     if (LOG_TO_FILE) {
         file = fopen("output_expmod.txt", "w");
     }
 
     // Doing the N loop in parallel.
-    #pragma omp parallel for num_threads(ALLOCATED_CORES) schedule(dynamic)
+    #pragma omp parallel for num_threads(max_threads) schedule(dynamic)
     for (unsigned long i = 0; i < iterations; i++) {
         mpz_t local_a;              mpz_init(local_a);
         mpz_t local_n;              mpz_init(local_n);
