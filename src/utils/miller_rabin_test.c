@@ -1,14 +1,5 @@
 #include "include/miller_rabin_test.h"
 
-void free_miller_rabin_vars(mpz_t s, mpz_t d, mpz_t a, mpz_t i, mpz_t res, mpz_t temp) {
-    mpz_clear(s);
-    mpz_clear(d);
-    mpz_clear(a);
-    mpz_clear(i);
-    mpz_clear(res);
-    mpz_clear(temp);
-}
-
 
 int miller_rabin(mpz_t n, mpz_t s, mpz_t d, mpz_t a, mpz_t i, mpz_t res, mpz_t temp, gmp_randstate_t randstate) {
 
@@ -59,12 +50,8 @@ int MillerRabin(mpz_t n, gmp_randstate_t randstate, int cpt) {
     int iter = 0;
 
     // Variables initialization.
-    mpz_t s;            mpz_init(s);
-    mpz_t d;            mpz_init(d);
-    mpz_t a;            mpz_init(a);
-    mpz_t i;            mpz_init(i);
-    mpz_t res;          mpz_init(res);
-    mpz_t temp;         mpz_init(temp);
+    mpz_t s, d, a, i, res, temp;
+    mpz_inits(s, d, a, i, res, temp, NULL);
 
     while (iter < cpt) {
         if (!miller_rabin(n, s, d, a, i, res, temp, randstate)) {
@@ -72,9 +59,9 @@ int MillerRabin(mpz_t n, gmp_randstate_t randstate, int cpt) {
             return 0;
         }
         iter ++;
-    } 
+    }
 
-    free_miller_rabin_vars(s, d, a, i, res, temp);
+    mpz_clears(s, d, a, i, res, temp, NULL);
 
     // If we reached here, we did not find a composite for the number, it is probably primary.
     return 1;

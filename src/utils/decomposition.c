@@ -31,9 +31,8 @@ void ExpMod(const mpz_t mod, mpz_t base, mpz_t exponent, mpz_t result) {
         return;
     }
 
-    mpz_t temp_result;      mpz_init(temp_result);
-    mpz_t new_exponent;     mpz_init(new_exponent);
-    mpz_t new_base;         mpz_init(new_base);
+    mpz_t temp_result, new_exponent, new_base;
+    mpz_inits(temp_result, new_exponent, new_base, NULL);
     
     mpz_mul(new_base, base, base); // new_base = base * base
     mpz_mod(new_base, new_base, mod); // new_base = new_base % mod
@@ -56,12 +55,8 @@ void ExpMod(const mpz_t mod, mpz_t base, mpz_t exponent, mpz_t result) {
 
     }
 
-    mpz_clear(new_exponent);
-    mpz_clear(new_base);
-
-    // Set the result
     mpz_set(result, temp_result);
-    mpz_clear(temp_result);
+    mpz_clears(new_exponent, new_base, temp_result, NULL);
 }
 
 

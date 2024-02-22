@@ -7,10 +7,9 @@ void try_n_decomp(const unsigned long n, gmp_randstate_t randstate, unsigned lon
     // Variables initialization.
     unsigned long i = 0;
     FILE* file;
-    mpz_t random_number; mpz_init(random_number);
-    mpz_t s;             mpz_init(s);
-    mpz_t d;             mpz_init(d);
-    mpz_t temp;          mpz_init(temp);
+    mpz_t random_number, s, d, temp;
+
+    mpz_inits(random_number, s, d, temp, NULL);
 
     if (LOG_TO_FILE) {
         file = fopen("output_decomp.txt", "w");
@@ -30,10 +29,7 @@ void try_n_decomp(const unsigned long n, gmp_randstate_t randstate, unsigned lon
     }
 
     // Freeing vars.
-    mpz_clear(random_number);
-    mpz_clear(s);
-    mpz_clear(d);
-    mpz_clear(temp);
+    mpz_clears(random_number, s, d, temp, NULL);
 
     if (LOG_TO_FILE) {
         fclose(file);
@@ -50,10 +46,9 @@ void try_n_exp_mod(const unsigned long iterations, gmp_randstate_t randstate, un
     // Variables initialization.
     unsigned long i = 0;
     FILE* file;
-    mpz_t a;        mpz_init(a);
-    mpz_t n;        mpz_init(n);
-    mpz_t t;        mpz_init(t);
-    mpz_t result;   mpz_init(result);
+
+    mpz_t a, n, t, result;
+    mpz_inits(a, n, t, result, NULL);
 
     if (LOG_TO_FILE) {
         file = fopen("output_expmod.txt", "w");
@@ -81,10 +76,7 @@ void try_n_exp_mod(const unsigned long iterations, gmp_randstate_t randstate, un
     }
 
     // Freeing vars.
-    mpz_clear(result);
-    mpz_clear(a);
-    mpz_clear(n);
-    mpz_clear(t);
+    mpz_clears(a, n, t, result, NULL);
 
     if (LOG_TO_FILE) {
         fclose(file);
@@ -110,10 +102,8 @@ void try_n_decomp_parallel(const unsigned long n, gmp_randstate_t randstate, uns
     // Doing the N loop in parallel.
     #pragma omp parallel for num_threads(max_threads) schedule(dynamic)
     for (unsigned long i = 0; i < n; i++) {
-        mpz_t local_random_number;          mpz_init(local_random_number);
-        mpz_t local_s;                      mpz_init(local_s);
-        mpz_t local_d;                      mpz_init(local_d);
-        mpz_t local_temp;                   mpz_init(local_temp);
+        mpz_t local_random_number, local_s, local_d, local_temp;
+        mpz_inits(local_random_number, local_s, local_d, local_temp, NULL);
 
         generate_big_randomNumber(RANDOM_NUMBERS_SIZE, randstate, local_random_number);
         Decomp(local_random_number, local_s, local_d);
@@ -126,10 +116,7 @@ void try_n_decomp_parallel(const unsigned long n, gmp_randstate_t randstate, uns
             }
         }
 
-        mpz_clear(local_random_number);
-        mpz_clear(local_s);
-        mpz_clear(local_d);
-        mpz_clear(local_temp);
+        mpz_clears(local_random_number, local_s, local_d, local_temp, NULL);
 
         // Ensure that shared counter is incremented in a thread-safe manner
         #pragma omp atomic
@@ -160,10 +147,8 @@ void try_n_exp_mod_parallel(const unsigned long iterations, gmp_randstate_t rand
     // Doing the N loop in parallel.
     #pragma omp parallel for num_threads(max_threads) schedule(dynamic)
     for (unsigned long i = 0; i < iterations; i++) {
-        mpz_t local_a;              mpz_init(local_a);
-        mpz_t local_n;              mpz_init(local_n);
-        mpz_t local_t;              mpz_init(local_t);
-        mpz_t local_result;         mpz_init(local_result);
+        mpz_t local_a, local_n, local_t, local_result;
+        mpz_inits(local_a, local_n, local_t, local_result, NULL);
 
         generate_big_randomNumber(RANDOM_NUMBERS_SIZE, randstate, local_a);
         generate_big_randomNumber(RANDOM_NUMBERS_SIZE, randstate, local_n);
@@ -183,10 +168,7 @@ void try_n_exp_mod_parallel(const unsigned long iterations, gmp_randstate_t rand
             }
         }
 
-        mpz_clear(local_a);
-        mpz_clear(local_n);
-        mpz_clear(local_t);
-        mpz_clear(local_result);
+        mpz_clears(local_a, local_n, local_t, local_result, NULL);
 
         // Ensure that shared counter is incremented in a thread-safe manner
         #pragma omp atomic
@@ -209,11 +191,8 @@ void test_expmods(gmp_randstate_t randstate, unsigned long* shared_iteration_cou
 
     // Variables initialization.
     FILE* file;
-    mpz_t a;            mpz_init(a);
-    mpz_t n;            mpz_init(n);
-    mpz_t t;            mpz_init(t);
-    mpz_t my_result;    mpz_init(my_result);
-    mpz_t gmp_result;   mpz_init(gmp_result);
+    mpz_t a, n, t, my_result, gmp_result;
+    mpz_inits(a, n, t, my_result, gmp_result, NULL);
 
     generate_big_randomNumber(RANDOM_NUMBERS_SIZE, randstate, a);
     generate_big_randomNumber(RANDOM_NUMBERS_SIZE, randstate, n);
@@ -255,11 +234,7 @@ void test_expmods(gmp_randstate_t randstate, unsigned long* shared_iteration_cou
     *shared_iteration_count += 1;
 
     // Freeing vars.
-    mpz_clear(my_result);
-    mpz_clear(gmp_result);
-    mpz_clear(a);
-    mpz_clear(n);
-    mpz_clear(t);
+    mpz_clears(a, n, t, my_result, gmp_result, NULL);
 
     if (LOG_TO_FILE) { fclose(file); }
     if (DEBUG_MODE)  { printf("[INFO] - Done the 2 EXPMOD tests.\n"); }
@@ -271,9 +246,10 @@ void try_miller_rabin(gmp_randstate_t randstate, unsigned long* shared_iteration
 
     // Variables initialization.
     FILE* file;
-    mpz_t v1;            mpz_init_set_str(v1, "FFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD129024E088A67CC74020BBEA63B139B22514A08798E3404DDEF9519B3CD3A431B302B0A6DF25F14374FE1356D6D51C245E485B576625E7EC6F44C42E9A63A3620FFFFFFFFFFFFFFFF", 16);
-    mpz_t v2;            mpz_init_set_str(v2, "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEC4FFFFFDAF0000000000000000000000000000000000000000000000000000000000000000000000000000000000000002D9AB", 16);
-    mpz_t v3;            mpz_init_set_str(v3, "FFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD129024E088A67CC74020BBEA63B139B22514A08798E3404DDEF9519B3CD3A431B302B0A6DF25F14374FE1356D6D51C245E485B576625E7EC6F44C42E9A637ED6B0BFF5CB6F406B7EDEE386BFB5A899FA5AE9F24117C4B1FE649286651ECE65381FFFFFFFFFFFFFFFF", 16);
+    mpz_t v1, v2, v3;
+    mpz_init_set_str(v1, "FFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD129024E088A67CC74020BBEA63B139B22514A08798E3404DDEF9519B3CD3A431B302B0A6DF25F14374FE1356D6D51C245E485B576625E7EC6F44C42E9A63A3620FFFFFFFFFFFFFFFF", 16);
+    mpz_init_set_str(v2, "FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEC4FFFFFDAF0000000000000000000000000000000000000000000000000000000000000000000000000000000000000002D9AB", 16);
+    mpz_init_set_str(v3, "FFFFFFFFFFFFFFFFC90FDAA22168C234C4C6628B80DC1CD129024E088A67CC74020BBEA63B139B22514A08798E3404DDEF9519B3CD3A431B302B0A6DF25F14374FE1356D6D51C245E485B576625E7EC6F44C42E9A637ED6B0BFF5CB6F406B7EDEE386BFB5A899FA5AE9F24117C4B1FE649286651ECE65381FFFFFFFFFFFFFFFF", 16);
     
     int v1_res;
     int v2_res;
@@ -304,9 +280,7 @@ void try_miller_rabin(gmp_randstate_t randstate, unsigned long* shared_iteration
     }
 
     // Freeing vars.
-    mpz_clear(v1);
-    mpz_clear(v2);
-    mpz_clear(v3);
+    mpz_clears(v1, v2, v3, NULL);
 
     if (LOG_TO_FILE) { fclose(file); }
     if (DEBUG_MODE)  { printf("[INFO] - Done the Miller Rabin tests.\n"); }
